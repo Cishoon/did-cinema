@@ -1,27 +1,25 @@
 <template>
-  <div>
+  <div class="scroll-box" :style="{ maxHeight: maxHeight }">
     <a-space direction="vertical">
       <!-- <h3>{{ `签发者: ${vc.issuer}` }}</h3> -->
       <a-card class="info-card" title="基本信息">
         <div class="info-content">
           <p class="info-item">{{ `类型: ${vc.type.join(", ")}` }}</p>
           <p class="info-item">{{ `签发者: ${vc.issuer}` }}</p>
-          <p class="info-item">{{ `签发日期: ${vc.issuanceDate}` }}</p>
+          <p class="info-item">
+            {{ `签发日期: ${formatDateTime(vc.issuanceDate)}` }}
+          </p>
         </div>
       </a-card>
       <a-card class="info-card" title="凭证主体">
-        <div class="info-content">
-          <p class="info-item">{{ `ID: ${vc.credentialSubject.id}` }}</p>
-          <p class="info-item">
-            {{ `出生年份: ${vc.credentialSubject.birthYear}` }}
-          </p>
-          <!-- <p class="info-item" v-for="vc.c"></p> -->
-        </div>
+        <pre>{{ JSON.stringify(vc.credentialSubject, null, 2) }}</pre>
       </a-card>
       <a-card class="info-card" title="证明信息" v-if="vc.proof">
         <div class="info-content">
           <p class="info-item">{{ `类型: ${vc.proof.type}` }}</p>
-          <p class="info-item">{{ `创建时间: ${vc.proof.created}` }}</p>
+          <p class="info-item">
+            {{ `创建时间: ${formatDateTime(vc.proof.created)}` }}
+          </p>
           <p class="info-item">
             {{ `验证方法: ${vc.proof.verificationMethod}` }}
           </p>
@@ -36,8 +34,12 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { VerifiableCredential } from "../utils/vc/VerifiableCredentials";
+import { formatDateTime } from "../utils/utils";
 
-const props = defineProps<{ vc: VerifiableCredential }>();
+const props = defineProps<{
+  vc: VerifiableCredential;
+  maxHeight?: string;
+}>();
 
 const vc = ref(props.vc);
 
@@ -50,6 +52,12 @@ watch(
 </script>
 
 <style scoped>
+.scroll-box {
+  max-height: 60vh;
+  max-width: 80vw;
+  overflow-y: auto;
+}
+
 .info-card {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

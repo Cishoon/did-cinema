@@ -2,50 +2,43 @@ import { generateKeyPair } from "../utils/did";
 import { ec as EC } from 'elliptic';
 import multibase from 'multibase';
 import crypto from 'crypto';
+import shajs from 'sha.js';
+import { signData } from "../utils/utils";
 
-async function signData(data: string, privateKeyBase64: string): Promise<string>
-{
-    const ec = new EC('secp256k1');
-    const privateKeyHex = Buffer.from(privateKeyBase64, 'base64').toString('hex');
-    const keyPair = ec.keyFromPrivate(privateKeyHex, 'hex');
+import { MerkleTree } from "../utils/MerkleTree";
 
-    const hash = crypto.createHash('sha256').update(data).digest();
-    const signature = keyPair.sign(hash);
-    const signatureBase64 = Buffer.from(signature.toDER()).toString('base64');
-
-    return signatureBase64;
-}
-
-async function verifySignature(data: string, signatureBase64: string, publicKeyBase58btc: string): Promise<boolean>
-{
-    const ec = new EC('secp256k1');
-    const publicKeyArray = multibase.decode(Buffer.from(publicKeyBase58btc, 'utf-8'));
-    const keyPair = ec.keyFromPublic(publicKeyArray, 'array');
-
-    const hash = crypto.createHash('sha256').update(data).digest();
-    const signatureDER = Buffer.from(signatureBase64, 'base64');
-
-    return keyPair.verify(hash, signatureDER);
-}
 
 async function main()
 {
-    const { publicKey, privateKey } = await generateKeyPair();
+    let hashFunctionWithoutSalt = (input: string) => { return shajs("sha256").update(input).digest("hex") };
+    // let hashFunctionWithoutSalt = (input: string) => { return input };
+    let seed = "1324564897";
+    let nodes = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
-    const data = "Hello, world!";
+    let merkleTree = new MerkleTree(
+        nodes,
+        seed,
+    )
 
-    // 使用私钥给数据签名
-    const signature = await signData(data, privateKey);
-    console.log('Signature:', signature);
+    let salts = merkleTree.getSalts();
 
-    // 使用公钥校验签名
-    const isValid = await verifySignature(data, signature, publicKey);
-    console.log('Signature valid:', isValid);
-    
-    // 修改数据，校验签名
-    const modifiedData = "Hello, world?";
-    const isValidModifiedData = await verifySignature(modifiedData, signature, publicKey);
-    console.log('Modified data signature valid:', isValidModifiedData);
+
+
+    // console.log(merkleTree.getRoot());
+    // console.log(merkleTree.getMerklesibling(0));
+    // console.log(merkleTree.calculateRootBySibling(merkleTree.getMerklesibling(0), "a", 0));
+    const root = merkleTree.getRoot();
+    const leaf = "f";
+    const index = 5;
+    const sibling = merkleTree.getMerklesibling(index);
+    const calculatedRoot = MerkleTree.calculateRootBySibling(sibling, leaf, salts[index], index);
+
+    console.log(root)
+    console.log(sibling)
+    console.log(calculatedRoot)
+    console.log(root == calculatedRoot);
 }
 
+
+console.log("=================================================")
 main();

@@ -9,7 +9,7 @@ var cors = require('cors');
 
 import { envOrDefault, getFirstDirFileName } from './utils/utils';
 import { generateDIDDocument, generateDID, generateKeyPair } from './utils/did';
-import { createBirthYearCredential } from './utils/vc';
+import { checkBirthYearMerkeTreeProof, checkVCProof, checkVPProof, createBirthYearCredential, createBirthYearCredentialByMerkleTree } from './utils/vc';
 
 const app = express();
 app.use(express.json()); // for parsing application/json
@@ -142,6 +142,9 @@ app.get('/api/did/:did', async (req, res) =>
 app.post('/api/vc/birthday/apply', async (req, res) =>
 {
     const { birthyear, did } = req.body;
+    if (!birthyear || !did) {
+        return res.status(400).send('Missing required parameters: birthyear, did');
+    }
 
     const result = await fs.readFile('./wallet/vcissuer.json')
     if (!result) {
@@ -151,8 +154,83 @@ app.post('/api/vc/birthday/apply', async (req, res) =>
     const privateKey = keyPair.privateKey;
 
     const vc = await createBirthYearCredential("did:example:vcissuer", did, birthyear, privateKey);
-    console.log(vc)
     res.json(vc);
+});
+
+app.post('/api/vc/birthday_merkle/apply', async (req, res) =>
+{
+    const { birthyear, did } = req.body;
+    if (!birthyear || !did) {
+        return res.status(400).send('Missing required parameters: birthyear, did');
+    }
+
+    const result = await fs.readFile('./wallet/vcissuer.json')
+    if (!result) {
+        return res.status(400).send('VC Issuer不存在！');
+    }
+    const keyPair = JSON.parse(result.toString());
+    const privateKey = keyPair.privateKey;
+
+    const vc = await createBirthYearCredentialByMerkleTree("did:example:vcissuer", did, birthyear, privateKey);
+    res.json(vc);
+})
+
+app.post('/api/vc/birthday/verify', async (req, res) =>
+{
+    const { vp } = req.body;
+    if (vp.proof && !await checkVPProof(contract, vp)) {
+        res.json({ verified: false, message: "VP签名错误！" });
+        return;
+    }
+    if (vp.verifiableCredential.length !== 1) {
+        res.json({ verified: false, message: "VP中的VC数量不为1！" });
+        return;
+    }
+    const vc = vp.verifiableCredential[0];
+    if (vc.proof && !await checkVCProof(contract, vc)) {
+        res.json({ verified: false, message: "VC签名错误！" });
+        return;
+    }
+
+    // 获取VC中的credentialSubject
+    const credentialSubject = vc.credentialSubject;
+    res.json({ verified: true, message: `验证成功！出生年份为${credentialSubject.birthYear}` });
+});
+
+app.post('/api/vc/birthday_merkle/verify', async (req, res) =>
+{
+    const { vp } = req.body;
+    if (vp.proof && !await checkVPProof(contract, vp)) {
+        res.json({ verified: false, message: "VP签名错误！" });
+        return;
+    }
+    if (vp.verifiableCredential.length !== 1) {
+        res.json({ verified: false, message: "VP中的VC数量不为1！" });
+        return;
+    }
+    const vc = vp.verifiableCredential[0];
+    if (vc.proof && !await checkVCProof(contract, vc)) {
+        res.json({ verified: false, message: "VC签名错误！" });
+        return;
+    }
+    // 获取VC中的credentialSubject
+    const credentialSubject = vc.credentialSubject;
+
+    const verified = await checkBirthYearMerkeTreeProof(contract, credentialSubject);
+
+
+    // res.json({ verified: verified, message: `验证结果` });
+    if (verified) {
+        const birthYear = credentialSubject.assert.split(":")[0];
+        const birthStatus = credentialSubject.assert.split(":")[1] === "1" ? "已出生" : "未出生";
+        // res.json({ verified: true, message: `验证成功！出生年份为${credentialSubject.birthYear}` });
+        res.json({
+            verified: true,
+            message: `验证成功！在${birthYear}，该用户${birthStatus}`
+        })
+    } else {
+        res.json({ verified: false, message: `验证失败！凭证内容有误。` });
+    }
 });
 
 
@@ -200,7 +278,9 @@ async function startServer()
     app.listen(PORT, '0.0.0.0', () =>
     {
         console.log(`Server is running on port ${PORT}`);
+        console.log("=================================")
     });
 }
 startServer();
+
 

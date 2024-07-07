@@ -7,8 +7,8 @@
             <!-- 版本、签名算法、更新时间和创建时间 -->
             <div class="info-content">
             <p class="info-item">{{ `版本: ${didDocument.versionId}` }}</p>
-            <p class="info-item">{{ `更新时间: ${didDocument.updated}` }}</p>
-            <p class="info-item">{{ `创建时间: ${didDocument.created}` }}</p>
+            <p class="info-item">{{ `更新时间: ${formatDateTime(didDocument.updated)}` }}</p>
+            <p class="info-item">{{ `创建时间: ${formatDateTime(didDocument.created)}` }}</p>
             </div>
         </a-card>
 
@@ -54,6 +54,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatDateTime } from "../utils/utils";
 import { IconEye, IconEyeInvisible } from "@arco-design/web-vue/es/icon";
 import { ref } from "vue";
 

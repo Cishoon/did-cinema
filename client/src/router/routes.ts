@@ -4,12 +4,15 @@ import { Message } from "@arco-design/web-vue";
 import
 {
   IconBook,
+  IconBookmark,
   IconBrush,
   IconCode,
   IconEdit,
   IconFile,
   IconFontColors,
   IconHome,
+  IconList,
+  IconSafe,
 } from "@arco-design/web-vue/es/icon";
 
 /**
@@ -24,10 +27,10 @@ export const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: "did",
-        name: "DID管理",
+        name: "个人DID凭证",
         component: () => import("../views/DIDView.vue"),
         meta: {
-          icon: IconHome,
+          icon: IconBookmark,
           hideInMenu: false,
         },
       },
@@ -36,7 +39,7 @@ export const routes: Array<RouteRecordRaw> = [
         name: "申请VC",
         component: () => import("../views/VCView.vue"),
         meta: {
-          icon: IconHome,
+          icon: IconSafe,
           hideInMenu: false,
         },
       },
@@ -45,7 +48,7 @@ export const routes: Array<RouteRecordRaw> = [
         name: "管理VC",
         component: () => import("../views/VCManageView.vue"),
         meta: {
-          icon: IconHome,
+          icon: IconList,
           hideInMenu: false,
         },
       },

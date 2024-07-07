@@ -48,13 +48,13 @@ async function generateDIDDocument(did: string, publicKeyMultibase: string)
         updated: new Date().toISOString(),
         verificationMethod: [
             {
-                id: `${did}#key-1`,
+                id: `${did}#keys-1`,
                 type: 'secp256k1',
                 controller: did,
                 publicKeyMultibase: publicKeyMultibase
             }
         ],
-        authentication: `${did}#key-1`
+        authentication: `${did}#keys-1`
     };
 }
 

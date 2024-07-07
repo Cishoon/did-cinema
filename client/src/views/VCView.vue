@@ -9,9 +9,17 @@
       <a-card title="申请“出生年份”的可验证声明">
         <a-space>
           <p>出生年份：</p>
-          <a-year-picker v-model="birthyear" style="width: 200px" />
+          <a-year-picker
+            v-model="birthyear"
+            style="width: 200px"
+            :disabled-date="(current: Date) => {
+              return dayjs(current).isBefore(dayjs('1900-01-01')) || dayjs(current).isAfter(dayjs('2020-12-31'));
+            }"
+            :default-picker-value="dayjs('2012-01-01')"
+          />
           <a-button type="primary" @click="applyVCByBirthyear">提交</a-button>
         </a-space>
+        <p>有效年份范围为[1900, 2020]</p>
       </a-card>
     </a-space>
   </div>
@@ -27,6 +35,7 @@
 </template>
 
 <script setup lang="ts">
+import dayjs from "dayjs";
 import { Message } from "@arco-design/web-vue";
 import { onMounted, ref } from "vue";
 import axios from "axios";
@@ -69,7 +78,7 @@ const applyVCByBirthyear = async () => {
 
   const did = JSON.parse(didDocument).id;
   const res = await axios.post(
-    "http://123.60.186.80:3000/api/vc/birthday/apply",
+    "http://123.60.186.80:3000/api/vc/birthday_merkle/apply",
     {
       birthyear: birthyear.value,
       did,

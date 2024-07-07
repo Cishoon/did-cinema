@@ -3,6 +3,7 @@ import { promises as fs } from 'fs';
 import { ec as EC } from 'elliptic';
 import multibase from 'multibase';
 import crypto from 'crypto';
+import shajs from 'sha.js';
 /**
  * envOrDefault() will return the value of an environment variable, or a default value if the variable is undefined.
  */
@@ -66,4 +67,26 @@ async function verifySignature(data: string, signatureBase64: string, publicKeyB
 
     return keyPair.verify(hash, signatureDER);
 }
-export { envOrDefault, getFirstDirFileName, signData, verifySignature };
+
+function generateMerkleTree(hashAssertions: any[])
+{
+    if (hashAssertions.length === 0) {
+        throw new Error("Empty array");
+    }
+
+    if (hashAssertions.length === 1) {
+        return hashAssertions[0];
+    }
+
+    const nextLevel: string[] = [];
+    for (let i = 0; i < hashAssertions.length; i += 2) {
+        const leftHash = hashAssertions[i];
+        const rightHash = (i + 1 < hashAssertions.length) ? hashAssertions[i + 1] : leftHash;
+        const combinedHash = shajs('sha256').update(leftHash + rightHash).digest('hex');
+        nextLevel.push(combinedHash);
+    }
+
+    return generateMerkleTree(nextLevel);
+}
+export { envOrDefault, getFirstDirFileName, signData, verifySignature, generateMerkleTree };
+

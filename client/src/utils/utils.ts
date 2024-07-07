@@ -1,7 +1,8 @@
 import { ec as EC } from 'elliptic';
+import shajs from 'sha.js';
 import multibase from 'multibase';
-import crypto from 'crypto';
-
+import { Buffer } from 'buffer';
+import moment from "moment-timezone";
 
 async function signData(data: string, privateKeyBase64: string): Promise<string>
 {
@@ -9,8 +10,8 @@ async function signData(data: string, privateKeyBase64: string): Promise<string>
     const privateKeyHex = Buffer.from(privateKeyBase64, 'base64').toString('hex');
     const keyPair = ec.keyFromPrivate(privateKeyHex, 'hex');
 
-    const hash = crypto.createHash('sha256').update(data).digest();
-    const signature = keyPair.sign(hash);
+    const hash = shajs('sha256').update(data).digest('hex');
+    const signature = keyPair.sign(hash, 'hex');
     const signatureBase64 = Buffer.from(signature.toDER()).toString('base64');
 
     return signatureBase64;
@@ -22,10 +23,17 @@ async function verifySignature(data: string, signatureBase64: string, publicKeyB
     const publicKeyArray = multibase.decode(Buffer.from(publicKeyBase58btc, 'utf-8'));
     const keyPair = ec.keyFromPublic(publicKeyArray, 'array');
 
-    const hash = crypto.createHash('sha256').update(data).digest();
+    const hash = shajs('sha256').update(data).digest('hex');
     const signatureDER = Buffer.from(signatureBase64, 'base64');
 
     return keyPair.verify(hash, signatureDER);
 }
 
-export { signData, verifySignature };
+const formatDateTime = (dateStr: string) =>
+{
+    return moment(dateStr).tz("Asia/Shanghai").format("YYYY-MM-DD HH:mm");
+    // return moment(dateStr).add(8, 'hours').format("YYYY-MM-DD HH:mm");
+
+};
+
+export { signData, verifySignature, formatDateTime };
