@@ -9,15 +9,20 @@
             "version": "1.0.0",
             "license": "Apache-2.0",
             "dependencies": {
+                "elliptic": "^6.5.5",
                 "fabric-contract-api": "~2.5",
                 "fabric-shim": "~2.5",
                 "json-stringify-deterministic": "^1.0.0",
+                "multibase": "^4.0.6",
+                "sha.js": "^2.4.11",
                 "sort-keys-recursive": "^2.1.0"
             },
             "devDependencies": {
                 "@eslint/js": "^9.3.0",
                 "@tsconfig/node18": "^18.2.4",
+                "@types/elliptic": "^6.4.18",
                 "@types/node": "^18.19.33",
+                "@types/sha.js": "^2.4.4",
                 "eslint": "^8.57.0",
                 "typescript": "~5.4.5",
                 "typescript-eslint": "^7.11.0"
@@ -205,6 +210,11 @@
                 "url": "https://opencollective.com/js-sdsl"
             }
         },
+        "node_modules/@multiformats/base-x": {
+            "version": "4.0.1",
+            "resolved": "https://mirrors.huaweicloud.com/repository/npm/@multiformats/base-x/-/base-x-4.0.1.tgz",
+            "integrity": "sha512-eMk0b9ReBbV23xXU693TAIrLyeO5iTgBZGSJfpqriG8UkYvr/hC9u9pyMlAakDNHWmbhMZCDs6KQO0jzKD8OTw=="
+        },
         "node_modules/@nodelib/fs.scandir": {
             "version": "2.1.5",
             "resolved": "https://registry.npmjs.org/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz",
@@ -300,12 +310,39 @@
             "integrity": "sha512-5xxU8vVs9/FNcvm3gE07fPbn9tl6tqGGWA9tSlwsUEkBxtRnTsNmwrV8gasZ9F/EobaSv9+nu8AxUKccw77JpQ==",
             "dev": true
         },
+        "node_modules/@types/bn.js": {
+            "version": "5.1.5",
+            "resolved": "https://mirrors.huaweicloud.com/repository/npm/@types/bn.js/-/bn.js-5.1.5.tgz",
+            "integrity": "sha512-V46N0zwKRF5Q00AZ6hWtN0T8gGmDUaUzLWQvHFo5yThtVwK/VCenFY3wXVbOvNfajEpsTfQM4IN9k/d6gUVX3A==",
+            "dev": true,
+            "dependencies": {
+                "@types/node": "*"
+            }
+        },
+        "node_modules/@types/elliptic": {
+            "version": "6.4.18",
+            "resolved": "https://mirrors.huaweicloud.com/repository/npm/@types/elliptic/-/elliptic-6.4.18.tgz",
+            "integrity": "sha512-UseG6H5vjRiNpQvrhy4VF/JXdA3V/Fp5amvveaL+fs28BZ6xIKJBPnUPRlEaZpysD9MbpfaLi8lbl7PGUAkpWw==",
+            "dev": true,
+            "dependencies": {
+                "@types/bn.js": "*"
+            }
+        },
         "node_modules/@types/node": {
             "version": "18.19.34",
             "resolved": "https://registry.npmjs.org/@types/node/-/node-18.19.34.tgz",
             "integrity": "sha512-eXF4pfBNV5DAMKGbI02NnDtWrQ40hAN558/2vvS4gMpMIxaf6JmD7YjnZbq0Q9TDSSkKBamime8ewRoomHdt4g==",
             "dependencies": {
                 "undici-types": "~5.26.4"
+            }
+        },
+        "node_modules/@types/sha.js": {
+            "version": "2.4.4",
+            "resolved": "https://mirrors.huaweicloud.com/repository/npm/@types/sha.js/-/sha.js-2.4.4.tgz",
+            "integrity": "sha512-Qukd+D6S2Hm0wLVt2Vh+/eWBIoUt+wF8jWjBsG4F8EFQRwKtYvtXCPcNl2OEUQ1R+eTr3xuSaBYUyM3WD1x/Qw==",
+            "dev": true,
+            "dependencies": {
+                "@types/node": "*"
             }
         },
         "node_modules/@types/triple-beam": {
@@ -612,6 +649,11 @@
             "integrity": "sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==",
             "dev": true
         },
+        "node_modules/bn.js": {
+            "version": "4.12.0",
+            "resolved": "https://mirrors.huaweicloud.com/repository/npm/bn.js/-/bn.js-4.12.0.tgz",
+            "integrity": "sha512-c98Bf3tPniI+scsdk237ku1Dc3ujXQTSgyiPUDEOe7tRkhrqridvh8klBv0HCEso1OLOYcHuCv/cS6DNxKH+ZA=="
+        },
         "node_modules/brace-expansion": {
             "version": "1.1.11",
             "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-1.1.11.tgz",
@@ -633,6 +675,11 @@
             "engines": {
                 "node": ">=8"
             }
+        },
+        "node_modules/brorand": {
+            "version": "1.1.0",
+            "resolved": "https://mirrors.huaweicloud.com/repository/npm/brorand/-/brorand-1.1.0.tgz",
+            "integrity": "sha512-cKV8tMCEpQs4hK/ik71d6LrPOnpkpGBR0wzxqr68g2m/LB2GxVYQroAjMJZRVM1Y4BCjCKc3vAamxSzOY2RP+w=="
         },
         "node_modules/callsites": {
             "version": "3.1.0",
@@ -798,6 +845,20 @@
             },
             "engines": {
                 "node": ">=6.0.0"
+            }
+        },
+        "node_modules/elliptic": {
+            "version": "6.5.5",
+            "resolved": "https://mirrors.huaweicloud.com/repository/npm/elliptic/-/elliptic-6.5.5.tgz",
+            "integrity": "sha512-7EjbcmUm17NQFu4Pmgmq2olYMj8nwMnpcddByChSUjArp8F5DQWcIcpriwO4ZToLNAJig0yiyjswfyGNje/ixw==",
+            "dependencies": {
+                "bn.js": "^4.11.9",
+                "brorand": "^1.1.0",
+                "hash.js": "^1.0.0",
+                "hmac-drbg": "^1.0.1",
+                "inherits": "^2.0.4",
+                "minimalistic-assert": "^1.0.1",
+                "minimalistic-crypto-utils": "^1.0.1"
             }
         },
         "node_modules/emoji-regex": {
@@ -1272,6 +1333,25 @@
                 "node": ">=8"
             }
         },
+        "node_modules/hash.js": {
+            "version": "1.1.7",
+            "resolved": "https://mirrors.huaweicloud.com/repository/npm/hash.js/-/hash.js-1.1.7.tgz",
+            "integrity": "sha512-taOaskGt4z4SOANNseOviYDvjEJinIkRgmp7LbKP2YTTmVxWBl87s/uzK9r+44BclBSp2X7K1hqeNfz9JbBeXA==",
+            "dependencies": {
+                "inherits": "^2.0.3",
+                "minimalistic-assert": "^1.0.1"
+            }
+        },
+        "node_modules/hmac-drbg": {
+            "version": "1.0.1",
+            "resolved": "https://mirrors.huaweicloud.com/repository/npm/hmac-drbg/-/hmac-drbg-1.0.1.tgz",
+            "integrity": "sha512-Tti3gMqLdZfhOQY1Mzf/AanLiqh1WTiJgEj26ZuYQ9fbkLomzGchCws4FyrSd4VkpBfiNhaE1On+lOz894jvXg==",
+            "dependencies": {
+                "hash.js": "^1.0.3",
+                "minimalistic-assert": "^1.0.0",
+                "minimalistic-crypto-utils": "^1.0.1"
+            }
+        },
         "node_modules/ignore": {
             "version": "5.3.1",
             "resolved": "https://registry.npmjs.org/ignore/-/ignore-5.3.1.tgz",
@@ -1540,6 +1620,16 @@
                 "node": ">=8.6"
             }
         },
+        "node_modules/minimalistic-assert": {
+            "version": "1.0.1",
+            "resolved": "https://mirrors.huaweicloud.com/repository/npm/minimalistic-assert/-/minimalistic-assert-1.0.1.tgz",
+            "integrity": "sha512-UtJcAD4yEaGtjPezWuO9wC4nwUnVH/8/Im3yEHQP4b67cXlD/Qr9hdITCU1xDbSEXg2XKNaP8jsReV7vQd00/A=="
+        },
+        "node_modules/minimalistic-crypto-utils": {
+            "version": "1.0.1",
+            "resolved": "https://mirrors.huaweicloud.com/repository/npm/minimalistic-crypto-utils/-/minimalistic-crypto-utils-1.0.1.tgz",
+            "integrity": "sha512-JIYlbt6g8i5jKfJ3xz7rF0LXmv2TkDxBLUkiBeZ7bAx4GnnNMr8xFpGnOxn6GhTEHx3SjRrZEoU+j04prX1ktg=="
+        },
         "node_modules/minimatch": {
             "version": "3.1.2",
             "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-3.1.2.tgz",
@@ -1556,6 +1646,19 @@
             "version": "2.1.2",
             "resolved": "https://registry.npmjs.org/ms/-/ms-2.1.2.tgz",
             "integrity": "sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w=="
+        },
+        "node_modules/multibase": {
+            "version": "4.0.6",
+            "resolved": "https://mirrors.huaweicloud.com/repository/npm/multibase/-/multibase-4.0.6.tgz",
+            "integrity": "sha512-x23pDe5+svdLz/k5JPGCVdfn7Q5mZVMBETiC+ORfO+sor9Sgs0smJzAjfTbM5tckeCqnaUuMYoz+k3RXMmJClQ==",
+            "deprecated": "This module has been superseded by the multiformats module",
+            "dependencies": {
+                "@multiformats/base-x": "^4.0.1"
+            },
+            "engines": {
+                "node": ">=12.0.0",
+                "npm": ">=6.0.0"
+            }
         },
         "node_modules/natural-compare": {
             "version": "1.4.0",
@@ -1868,6 +1971,18 @@
             },
             "engines": {
                 "node": ">=10"
+            }
+        },
+        "node_modules/sha.js": {
+            "version": "2.4.11",
+            "resolved": "https://mirrors.huaweicloud.com/repository/npm/sha.js/-/sha.js-2.4.11.tgz",
+            "integrity": "sha512-QMEp5B7cftE7APOjk5Y6xgrbWu+WkLVQwk8JNjZ8nKRciZaByEW6MubieAiToS7+dwvrjGhH8jRXz3MVd0AYqQ==",
+            "dependencies": {
+                "inherits": "^2.0.1",
+                "safe-buffer": "^5.0.1"
+            },
+            "bin": {
+                "sha.js": "bin.js"
             }
         },
         "node_modules/shebang-command": {

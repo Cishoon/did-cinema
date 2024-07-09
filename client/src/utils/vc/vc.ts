@@ -4,6 +4,7 @@ import stringify from 'json-stringify-deterministic';
 import sortKeysRecursive from 'sort-keys-recursive';
 import shajs from 'sha.js';
 import { MerkleTree } from "../MerkleTree";
+import { Message } from "@arco-design/web-vue";
 
 // 打包VC成VP
 async function createVerifiablePresentation(did: string, verifiableCredentials: VerifiableCredential[], privateKey: string): Promise<VerifiablePresentation>
@@ -116,6 +117,46 @@ async function anonymousVC(oldVc: VerifiableCredential, assertBirthYear: string)
     return newVC;
 }
 
+const generateVP = async (vc: VerifiableCredential, assert: string) =>
+{
+    // 获取did和privateKey
+    const didDocument = localStorage.getItem("did_document");
+    if (!didDocument) {
+        Message.error("请先到“个人信息”页面注册数字身份");
+        return;
+    }
+    const did = JSON.parse(didDocument).id;
 
-export { createVerifiablePresentation, anonymousVC };
+    const keyPair = localStorage.getItem("key_pair");
+    const privateKey = keyPair ? JSON.parse(keyPair).privateKey : "";
+    if (!privateKey) {
+        Message.error("找不到私钥");
+        return;
+    }
+
+    // 匿名掉VC中的生日信息
+    const anonymVC = await anonymousVC(vc, assert);
+    console.log(anonymVC);
+    // 将VC打包成VP，发送给验证者
+    const vp = await createVerifiablePresentation(did, [anonymVC], privateKey);
+    return vp;
+
+    // const res = await axios.post(
+    //   "http://123.60.186.80:3000/api/vc/birthday_merkle/verify",
+    //   {
+    //     vp,
+    //   }
+    // );
+    // if (res.status === 200) {
+    //   if (res.data.verified) {
+    //     Message.success(res.data.message);
+    //   } else {
+    //     Message.error(res.data.message);
+    //   }
+    // } else {
+    //   Message.error("发送验证请求失败");
+    // }
+};
+
+export { createVerifiablePresentation, anonymousVC, generateVP };
 

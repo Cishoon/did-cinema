@@ -7,13 +7,17 @@ import * as path from 'path';
 import { TextDecoder } from 'util';
 var cors = require('cors');
 
-import { envOrDefault, getFirstDirFileName } from './utils/utils';
+import { envOrDefault, getFirstDirFileName, verifySignature } from './utils/utils';
 import { generateDIDDocument, generateDID, generateKeyPair } from './utils/did';
 import { checkBirthYearMerkeTreeProof, checkVCProof, checkVPProof, createBirthYearCredential, createBirthYearCredentialByMerkleTree } from './utils/vc';
+import { fetchMovies, getMovieById } from './moviesAPI';
+import { get } from 'http';
+import { NFTicket } from './utils/NFTicket';
 
 const app = express();
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(express.static("public"))
 app.use(cors())
 const PORT = 3000;
 
@@ -99,6 +103,136 @@ async function connectToGateway()
 
     return { client, gateway };
 }
+
+app.get('/api/movies', async (req, res) =>
+{
+    try {
+        // Fetch all movies from the database or any other data source
+        const movies = await fetchMovies();
+        res.json(movies);
+    } catch (error) {
+        console.error('Error fetching movies:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.post("/api/movies/verify", async (req, res) =>
+{
+    const { ticketId, signedTicketId } = req.body;
+
+    // 先根据ticketId获取电影票
+    let result;
+    let nfticket: NFTicket;
+    try {
+        result = await contract.evaluateTransaction('NFTicketContract:queryNFTicket', ticketId);
+        nfticket = JSON.parse(Buffer.from(result).toString());
+    } catch (error) {
+        console.error('Error fetching movies:', error);
+        return res.json({ verified: false, message: "该NFT电影票不存在！" });
+    }
+
+    // 检查是否过期
+    const expirationDate = new Date(nfticket.expirationDate);
+    if (expirationDate < new Date()) {
+        return res.json({ verified: false, message: "该NFT电影票已过期！" });
+    }
+
+    const ownerDid = nfticket.ownerDid;
+    // 根据ownerDid获取DID文档
+    const result2 = await contract.evaluateTransaction('getDIDDocument', ownerDid);
+    const didDocument = JSON.parse(Buffer.from(result2).toString('utf-8'));
+    // 获取公钥
+    const publicKeyMultibase = didDocument?.verificationMethod?.[0]?.publicKeyMultibase || ''; // Add null check and default value assignment
+    if (!publicKeyMultibase) {
+        return false;
+    }
+
+    // 验证签名
+    const verified = await verifySignature(ticketId, signedTicketId, publicKeyMultibase);
+    if (verified) {
+        return res.json({ verified: true, message: `验证成功！正在播放：${nfticket.movie}`, title: nfticket.movie });
+    } else {
+        return res.json({ verified: false, message: "验证失败，您没有该NFT电影票的使用权限！" });
+    }
+})
+
+app.post('/api/movies/buyticket', async (req, res) =>
+{
+    const { movieId, did, vp } = req.body;
+    if (!movieId || !did) {
+        return res.status(400).send('缺少必要参数：movieId, did');
+    }
+
+    const movie = await getMovieById(movieId); // Call the getMovieById function
+    if (!movie) {
+        return res.status(404).send('电影不存在！');
+    }
+
+    const expirationDate = new Date();
+    // 电影票有效期为2天
+    expirationDate.setDate(expirationDate.getDate() + 2);
+    const expirationDateString = expirationDate.toISOString();
+
+    // 如果没有年龄限制，直接创建电影票
+    if (movie.ageLimit === 0) {
+        const ticket = await contract.submitTransaction('NFTicketContract:createNFTicket', movie.title, expirationDateString, did);
+        return res.json({
+            "message": "购票成功！",
+            "ticket": Buffer.from(ticket).toString()
+        })
+    }
+
+    // 提供VP，验证年龄
+    if (!vp) {
+        return res.status(400).send('该电影有年龄限制，必须提供出生年份证明！');
+    }
+
+    // 验证VP
+    if (vp.proof && !await checkVPProof(contract, vp)) {
+        return res.status(400).send('VP签名错误！');
+    }
+    if (vp.verifiableCredential.length !== 1) {
+        return res.status(400).send('VP中的VC数量不为1！');
+    }
+    const vc = vp.verifiableCredential[0];
+    if (vc.proof && !await checkVCProof(contract, vc)) {
+        return res.status(400).send('VC签名错误！');
+    }
+    // 获取VC中的credentialSubject
+    const credentialSubject = vc.credentialSubject;
+    const assert = credentialSubject.assert;
+
+    // 今年的年份-18
+    const adultYear = new Date().getFullYear() - 18;
+    if (assert !== `${adultYear}:1`) {
+        return res.status(400).send('断言不匹配，应该是${adultYear}:1');
+    }
+
+    const verified = await checkBirthYearMerkeTreeProof(contract, credentialSubject);
+    if (!verified) {
+        return res.status(400).send('验证失败！未满18岁或凭证内容有误。');
+    }
+
+    // 创建电影票
+    const ticket = await contract.submitTransaction('NFTicketContract:createNFTicket', movie.title, expirationDateString, did);
+    return res.json({
+        "message": "购票成功！",
+        "ticket": Buffer.from(ticket).toString()
+    })
+});
+
+
+app.post('/api/sync/nfticket', async (req, res) =>
+{
+    const { ownerDid } = req.body;
+    if (!ownerDid) {
+        return res.status(400).send('缺少必要参数：ownerDid');
+    }
+
+    const nftickets = await contract.evaluateTransaction('NFTicketContract:getNFTicketsByOwner', ownerDid);
+    console.log(Buffer.from(nftickets).toString())
+    res.json(JSON.parse(Buffer.from(nftickets).toString()));
+})
 
 
 function displayInputParameters(): void
@@ -258,6 +392,8 @@ async function createVCIssuser(contract: Contract)
     await contract.submitTransaction('createDID', did, JSON.stringify(didDocument));
     console.log("创建VC Issuer成功！")
 }
+
+
 
 
 async function executeBeforeServerStart()

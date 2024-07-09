@@ -2,7 +2,7 @@
   <div class="container">
     <div
       v-if="!didDocument || JSON.stringify(didDocument) === '{}'"
-      style="display: flex"
+      style="display: flex; justify-content: center"
     >
       <p>您还没有数字身份，</p>
       <a-link type="primary" @click="createDID">立即创建DID</a-link>
@@ -12,6 +12,14 @@
         :private-key="privateKey"
         :did-document="didDocument"
       ></DIDDocumentCards>
+      <a-button
+        type="primary"
+        status="danger"
+        @click="deleteAllRecords"
+        style="margin-top: 16px; align-self: center"
+      >
+        删除所有本地记录
+      </a-button>
     </div>
   </div>
 </template>
@@ -50,6 +58,8 @@ onMounted(() => {
 
 // 创建DID
 const createDID = async () => {
+  Message.info("正在创建DID，请稍等...");
+
   const keyPair = await generateKeyPair();
   console.log(keyPair);
 
@@ -67,6 +77,15 @@ const createDID = async () => {
   } else {
     Message.error("创建DID失败");
     console.log(res);
+  }
+};
+
+// 删除所有记录
+const deleteAllRecords = () => {
+  if (confirm("确定要删除所有记录吗？此操作不可撤销")) {
+    localStorage.clear();
+    didDocument.value = {};
+    privateKey.value = "";
   }
 };
 </script>

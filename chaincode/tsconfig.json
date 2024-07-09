@@ -13,5 +13,7 @@
         "noImplicitReturns": true,
         "forceConsistentCasingInFileNames": true
     },
-    "include": ["src/", "../client/src/utils/did/VerifiableCredentials.ts"]
+    "include": [
+        "src/"
+    ]
 }

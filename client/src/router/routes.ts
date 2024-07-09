@@ -22,21 +22,48 @@ import
 export const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
-    redirect: "/did",
+    redirect: "/cinema",
     component: BasicLayout,
     children: [
+      {
+        path: "cinema",
+        name: "电影院",
+        component: () => import("../views/MoviesView.vue"),
+        meta: {
+          icon: IconHome,
+          hideInMenu: false,
+        },
+      },
+      {
+        path: "NFTicket",
+        name: "NFT票据管理",
+        component: () => import("../views/NFTicketView.vue"),
+        meta: {
+          icon: IconFile,
+          hideInMenu: false,
+        },
+      },
+      {
+        "path": "profile",
+        "name": "个人信息",
+        "component": () => import("../views/ProfileView.vue"),
+        "meta": {
+          "icon": IconEdit,
+          "hideInMenu": false,
+        },
+      },
       {
         path: "did",
         name: "个人DID凭证",
         component: () => import("../views/DIDView.vue"),
         meta: {
           icon: IconBookmark,
-          hideInMenu: false,
+          hideInMenu: true,
         },
       },
       {
         path: "applyVC",
-        name: "申请VC",
+        name: "申请出生证明",
         component: () => import("../views/VCView.vue"),
         meta: {
           icon: IconSafe,
@@ -49,9 +76,10 @@ export const routes: Array<RouteRecordRaw> = [
         component: () => import("../views/VCManageView.vue"),
         meta: {
           icon: IconList,
-          hideInMenu: false,
+          hideInMenu: true,
         },
       },
+
     ]
   },
   {
@@ -66,4 +94,13 @@ export const routes: Array<RouteRecordRaw> = [
       },
     ],
   },
+  {
+    path: "/watch/:ticketId",
+    name: "观看电影",
+    component: () => import("../views/WatchMovieView.vue"),
+    meta: {
+      icon: IconBook,
+      hideInMenu: true,
+    },
+  }
 ];

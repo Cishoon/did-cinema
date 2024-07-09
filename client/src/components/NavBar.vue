@@ -7,20 +7,58 @@
           :style="{ margin: 0, fontSize: '18px' }"
           :heading="5"
         >
-          DID分布式数字身份管理系统
+          <!-- DID分布式数字身份管理系统 -->
+          基于分布式数字身份的电影院售票系统
         </a-typography-title>
       </a-space>
     </div>
-    <div class="right-side" style="align-items: center; margin: 20px"></div>
+    <div class="right-side" style="align-items: center; margin: 20px">
+      <div v-if="!didDocument || JSON.stringify(didDocument) === '{}'">
+        <a-button type="outline" @click="navigateToProfile">
+          未注册数字身份
+        </a-button>
+      </div>
+      <div v-else>
+        <a-tooltip :content="didDocument.id" position="bottom">
+          <a-button type="outline" @click="navigateToProfile">
+            已注册
+          </a-button>
+        </a-tooltip>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from "vue";
+import router from "../router";
 import { Message } from "@arco-design/web-vue";
-import { useRouter } from "vue-router";
-import { ref } from "vue";
 
-const router = useRouter();
+const didDocument = ref();
+const privateKey = ref();
+
+const navigateToProfile = () => {
+  router.push("/profile");
+};
+
+onMounted(() => {
+  let _did_document = localStorage.getItem("did_document");
+
+  if (!_did_document) {
+    _did_document = "{}";
+  }
+
+  try {
+    didDocument.value = JSON.parse(_did_document);
+  } catch (error) {
+    console.log("本地存储中的DID数据解析失败");
+    didDocument.value = {};
+    localStorage.setItem("did_document", JSON.stringify({}));
+  }
+
+  let _key_pair = localStorage.getItem("key_pair");
+  privateKey.value = _key_pair ? JSON.parse(_key_pair).privateKey : "";
+});
 </script>
 
 <style scoped>

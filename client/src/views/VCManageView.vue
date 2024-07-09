@@ -102,7 +102,7 @@ import {
   VerifiablePresentation,
 } from "../utils/vc/VerifiableCredentials";
 import VCCards from "../components/VCCards.vue";
-import { anonymousVC, createVerifiablePresentation } from "../utils/vc/vc";
+import { createVerifiablePresentation, generateVP } from "../utils/vc/vc";
 import { Message } from "@arco-design/web-vue";
 import axios from "axios";
 import { formatDateTime } from "../utils/utils";
@@ -167,7 +167,7 @@ const showTestVC = (vc: VerifiableCredential) => {
   modalVisible2.value = true;
 
   testBirthStatus.value = 1;
-  testBirthYear.value = 2012;
+  testBirthYear.value = 2006;
 
   testChange();
 };
@@ -255,7 +255,7 @@ const verifyVC = async (vc: VerifiableCredential) => {
   // 获取did和privateKey
   const didDocument = localStorage.getItem("did_document");
   if (!didDocument) {
-    Message.error("请先注册DID");
+    Message.error("请先到“个人信息”页面注册数字身份");
     return;
   }
   const did = JSON.parse(didDocument).id;
@@ -285,47 +285,6 @@ const verifyVC = async (vc: VerifiableCredential) => {
   } else {
     Message.error("发送验证请求失败");
   }
-};
-
-const generateVP = async (vc: VerifiableCredential, assert: string) => {
-  // 获取did和privateKey
-  const didDocument = localStorage.getItem("did_document");
-  if (!didDocument) {
-    Message.error("请先注册DID");
-    return;
-  }
-  const did = JSON.parse(didDocument).id;
-
-  const keyPair = localStorage.getItem("key_pair");
-  const privateKey = keyPair ? JSON.parse(keyPair).privateKey : "";
-  if (!privateKey) {
-    Message.error("找不到私钥");
-    return;
-  }
-
-  // 匿名掉VC中的生日信息
-  const anonymVC = await anonymousVC(vc, assert);
-  console.log(anonymVC);
-  // 将VC打包成VP，发送给验证者
-  const vp = await createVerifiablePresentation(did, [anonymVC], privateKey);
-  // console.log(vp);
-  return vp;
-
-  // const res = await axios.post(
-  //   "http://123.60.186.80:3000/api/vc/birthday_merkle/verify",
-  //   {
-  //     vp,
-  //   }
-  // );
-  // if (res.status === 200) {
-  //   if (res.data.verified) {
-  //     Message.success(res.data.message);
-  //   } else {
-  //     Message.error(res.data.message);
-  //   }
-  // } else {
-  //   Message.error("发送验证请求失败");
-  // }
 };
 </script>
 
