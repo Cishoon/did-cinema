@@ -305,7 +305,7 @@ app.post('/api/vc/birthday_merkle/apply', async (req, res) =>
     const keyPair = JSON.parse(result.toString());
     const privateKey = keyPair.privateKey;
 
-    const vc = await createBirthYearCredentialByMerkleTree("did:example:vcissuer", did, birthyear, privateKey);
+    const vc = await createBirthYearCredentialByMerkleTree("did:example:vcissuer", did, birthyear, privateKey, contract);
     res.json(vc);
 })
 

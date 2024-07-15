@@ -51,7 +51,7 @@ async function createBirthYearCredential(issuerDID: string, subjectDID: string, 
 
 
 // 通过Merkle Tree创建VC
-async function createBirthYearCredentialByMerkleTree(issuerDID: string, subjectDID: string, birthYear: number, privateKey: string): Promise<VerifiableCredential>
+async function createBirthYearCredentialByMerkleTree(issuerDID: string, subjectDID: string, birthYear: number, privateKey: string, contract: Contract): Promise<VerifiableCredential>
 {
     const min = 1900;
     const max = 2020;
@@ -71,6 +71,7 @@ async function createBirthYearCredentialByMerkleTree(issuerDID: string, subjectD
 
     // 给树根签名
     const rootSignature = await signData(merkleTreeRoot, privateKey);
+    contract.submitTransaction("registerCredential", issuerDID, merkleTreeRoot);
 
     let description;
     if (birthYear < min) {
@@ -176,7 +177,7 @@ async function checkBirthYearMerkeTreeProof(contract: Contract, credentialSubjec
 {
     const min = 1900;
     console.log("credentialSubject", credentialSubject);
-    const { assert, salt, merklesibling, merkleTreeRoot, rootSignature, signer } = credentialSubject;
+    const { assert, dataIndex, salt, merklesibling, merkleTreeRoot, rootSignature, signer } = credentialSubject;
 
     // 先验证merkleTreeRoot的签名
     const signerDID = signer.split('#')[0];
@@ -191,9 +192,16 @@ async function checkBirthYearMerkeTreeProof(contract: Contract, credentialSubjec
         console.error("rootSignature verification failed");
         return false;
     }
+    const hasRegistedString = await contract.evaluateTransaction("checkCredential", signerDID, merkleTreeRoot)
+    const hasRegisted = Buffer.from(hasRegistedString).toString('utf-8') === "true";
+    if (!hasRegisted) {
+        console.error("merkleTreeRoot not registed");
+        return false;
+    }
 
     // 判断声明和数据是否匹配
-    const index = parseInt(assert.split(':')[0]) - min + 1;
+    // const index = parseInt(assert.split(':')[0]) - min + 1;
+    const index = dataIndex;
     const leaf = assert.split(':')[1];
 
     // 验证默克尔路径是否正确

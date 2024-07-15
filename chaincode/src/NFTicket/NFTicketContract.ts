@@ -97,8 +97,6 @@ export class NFTicketContract extends Contract
         return results;
     }
 
-
-
     private async getDIDDocumentFromDIDContract(ctx: Context, did: string): Promise<DIDDocument>
     {
         const didContractName = 'DIDContract'; // Name of the deployed DIDContract

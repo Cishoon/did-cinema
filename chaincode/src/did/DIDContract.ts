@@ -2,6 +2,7 @@ import { Context, Contract, Info, Returns, Transaction } from 'fabric-contract-a
 import { DIDDocument } from './DIDDocument';
 import stringify from 'json-stringify-deterministic';
 import sortKeysRecursive from 'sort-keys-recursive';
+import shajs from 'sha.js';
 
 @Info({ title: 'DID', description: 'Smart contract for DID' })
 export class DIDContract extends Contract
@@ -71,6 +72,25 @@ export class DIDContract extends Contract
         return didDocumentBytes && didDocumentBytes.length > 0;
     }
 
+    @Transaction()
+    public async registerCredential(ctx: Context, issuerDid: string, credential: string): Promise<void>
+    {
+        if (issuerDid !== 'did:example:vcissuer') {
+            throw new Error(`Issuer DID ${issuerDid} is not allowed to issue credentials`);
+        }
 
+        const credentialHash = shajs("sha256").update(credential).digest('hex');
+        // Store the credential
+        await ctx.stub.putState(credentialHash, Buffer.from(issuerDid));        
+    }
+    
+    @Transaction(false)
+    @Returns("boolean")
+    public async checkCredential(ctx: Context, issuerDid: string, credential: string): Promise<boolean>
+    {
+        const credentialHash = shajs("sha256").update(credential).digest('hex');
+        const issuerDidBytes = await ctx.stub.getState(credentialHash);
+        return issuerDidBytes && issuerDidBytes.length > 0 && issuerDidBytes.toString() === issuerDid;
+    }
 
 }

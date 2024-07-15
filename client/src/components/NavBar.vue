@@ -32,7 +32,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import router from "../router";
-import { Message } from "@arco-design/web-vue";
 
 const didDocument = ref();
 const privateKey = ref();

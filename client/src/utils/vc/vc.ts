@@ -103,6 +103,7 @@ async function anonymousVC(oldVc: VerifiableCredential, assertBirthYear: string)
     const newCredentialSubject = {
         id: credentialSubject.id,
         assert: assertBirthYear,
+        dataIndex: dataIndex,
         salt: merkleTree.getSalts()[dataIndex],
         merklesibling: merklesibling,
         merkleTreeRoot: credentialSubject.birthYearAssert.merkleTreeRoot,
